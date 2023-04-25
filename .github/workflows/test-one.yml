@@ -1,0 +1,39 @@
+name: Deploy to AWS ECR TEST ONE
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        
+      # 4. extract-scottish-data-to-s3
+      - name: Build, tag, and push extract-scottish-data-to-s3 image to Amazon ECR 
+        id: extract-scottish-data-to-s3-image
+        env:
+          REGISTRY:  ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: extract-scottish-data-to-s3
+          IMAGE_TAG: ${{ github.sha }} 
+
+        run: |
+          if git diff --name-only HEAD@{1} | grep -qE 'extract-scottish-data-to-s3|extract-scottish-data-to-s4'; then
+            echo " Print $REGISTRY, $REPOSITORY, $IMAGE_TAG"
+            docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+            docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG 
+          fi
+          
