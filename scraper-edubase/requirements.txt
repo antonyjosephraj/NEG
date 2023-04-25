@@ -1,0 +1,5 @@
+boto3
+pandas
+selenium
+pyarrow==10.0.1
+fastparquet

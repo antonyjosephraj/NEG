@@ -1,0 +1,6 @@
+pandas  == 1.5.1
+snowflake-connector-python
+selenium
+pyarrow
+fastparquet
+openpyxl
